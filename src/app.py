@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from schemas import TextRequest
 import joblib
 import uvicorn
 from contextlib import asynccontextmanager
@@ -43,6 +44,19 @@ async def health():
         return {
             "status": "ok",
             "model_loaded": True
+        }
+    except Exception as e:
+            return {
+                "status": "error",
+                "message": str(e)
+            }
+        
+@app.post("/sentiment", tags=["sentiment"])
+async def sentiment(request: TextRequest):
+    try:
+        sentiment = app.state.sentiment_model.predict([request.text])[0]
+        return {
+            "sentiment": sentiment
         }
     except Exception as e:
         return {
