@@ -1,5 +1,5 @@
 # TextAnalysForBusiness
-(Датасет)[https://www.kaggle.com/datasets/tarkkaanko/amazon]
+[Датасет](https://www.kaggle.com/datasets/tarkkaanko/amazon)
 REST API который получает на вход текст (отзыв) а на выход отдает всю нужную для бизнеса информацию:
 1) Сентиментальный анализ(Положительный/Нейтральный/Отрицательный отзыз)
 2) Тему отзыва
