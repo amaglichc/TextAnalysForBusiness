@@ -63,6 +63,17 @@ async def sentiment(request: TextRequest):
             "status": "error",
             "message": str(e)
         }
-
+@app.post("/topic", tags=["topic"])
+async def topic(request: TextRequest):
+    try:
+        topic = app.state.topic_model.predict([request.text])[0]
+        return {
+            "topic": topic
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000,reload=True)
