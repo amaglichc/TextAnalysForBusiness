@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from schemas import TextRequest
+from schemas import TextRequest, TopicResponse, AnalysisResponse
+from utils import predict_topic, summarize_review
 import joblib
 import uvicorn
 from contextlib import asynccontextmanager
@@ -63,17 +64,50 @@ async def sentiment(request: TextRequest):
             "status": "error",
             "message": str(e)
         }
+        
+        
 @app.post("/topic", tags=["topic"])
-async def topic(request: TextRequest):
+async def topic(request: TextRequest) -> TopicResponse:
     try:
-        topic = app.state.topic_model.predict([request.text])[0]
+        topic = predict_topic(request.text, app.state.topic_model)
+        return TopicResponse(**topic)
+    except Exception as e:
         return {
-            "topic": topic
+            "status": "error",
+            "message": str(e)
+        }
+        
+@app.post("/summarize", tags=["summarization"])
+async def summarize(request: TextRequest):
+    try:
+        summary = summarize_review(request.text, app.state.summarizer_model["word2idf"])
+        return {
+            "summary": summary
         }
     except Exception as e:
         return {
             "status": "error",
             "message": str(e)
         }
+
+
+@app.post("/analyze", tags=["analysis"])
+async def analyze(request: TextRequest) -> AnalysisResponse:
+    try:
+        sentiment = app.state.sentiment_model.predict([request.text])[0]
+        topic = predict_topic(request.text, app.state.topic_model)
+        summary = summarize_review(request.text, app.state.summarizer_model["word2idf"])
+        return AnalysisResponse(
+            sentiment=sentiment,
+            topic=TopicResponse(**topic),
+            summary=summary
+        )
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+        
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000,reload=True)

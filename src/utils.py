@@ -1,3 +1,7 @@
+import re
+import numpy as np
+
+
 topic_names = {
     0: "SD/Memory Cards",
     1: "Product Functionality / Satisfaction",
@@ -52,7 +56,7 @@ topic_names = {
 }
 
 
-def predict_topic(text, pipeline, topic_names):
+def predict_topic(text, pipeline, topic_names=topic_names):
     W = pipeline.transform([text])
     topic_id = int(W.argmax(axis=1)[0])
     score = float(W.max(axis=1)[0])
@@ -62,8 +66,15 @@ def predict_topic(text, pipeline, topic_names):
         "confidence": score
     }
     
-    
-def summarize_review(text, word2idf=word2idf, top_k=1):
+def _split_sentences(text):
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    return [s.strip() for s in parts if s.strip()]
+
+def _tokenize_words(sent):
+    return re.findall(r"\b\w+\b", sent.lower())
+
+
+def summarize_review(text, word2idf, top_k=1):
     text = str(text).strip()
     if not text:
         return ""
