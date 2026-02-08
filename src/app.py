@@ -5,13 +5,19 @@ from utils import predict_topic, summarize_review
 import joblib
 import uvicorn
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent
+
+summarizer_path = BASE_DIR / "models" / "summarizer_model.pkl"
+topic_path = BASE_DIR / "models" / "topic_model.pkl"
+sentiment_path = BASE_DIR / "models" / "sentimental_model.pkl"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.summarizer_model = joblib.load("../models/summarizer_model.pkl")
-    app.state.sentiment_model = joblib.load("../models/sentimental_model.pkl")
-    app.state.topic_model = joblib.load("../models/topic_model.pkl")
+    app.state.summarizer_model = joblib.load(summarizer_path)
+    app.state.sentiment_model = joblib.load(sentiment_path)
+    app.state.topic_model = joblib.load(topic_path)
     yield
     del app.state.summarizer_model
     del app.state.sentiment_model
